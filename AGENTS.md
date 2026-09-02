@@ -193,6 +193,120 @@ Measure at least:
 - Preserve failed attempts and failure classifications; they are useful data.
 - Never modify canonical architecture solely to make a weak model score better unless that architecture change is itself a separately evaluated experiment.
 
+### Recommended benchmark process: find the capability frontier
+
+The primary benchmark should not ask "which model is best?". It should estimate, for each class of work object, the **smallest/cheapest model that succeeds reliably under a fixed packet contract**.
+
+Use four distinct phases.
+
+#### Phase A — validate the benchmark itself
+
+Before comparing worker models, run a strong reference model on representative work objects from each difficulty/risk bucket.
+
+A benchmark item is valid only if the reference model can solve it from the supplied packet without undeclared repository context. If the reference model repeatedly reports a missing/contradictory contract, treat that as a **benchmark/design defect**, not worker-model failure.
+
+Select a small set of canary objects spanning at least:
+
+- low-risk leaf/data work;
+- ordinary UI/render work;
+- stateful work;
+- concurrency/streaming work;
+- high-coupling DSH work.
+
+Do not tune packets against only one model family.
+
+#### Phase B — measure per-model capability
+
+For each benchmark item, test a model ladder from cheapest/smallest upward.
+
+Recommended procedure:
+
+1. start each model from the identical clean commit and packet hash;
+2. give identical tools, permissions, visible tests, and retry budget;
+3. run at least 3 independent **cold attempts** for meaningful reliability estimates when cost permits;
+4. score each attempt before revealing evaluator feedback;
+5. stop climbing once a model tier meets the required reliability target, unless collecting research data.
+
+Record two different notions of success:
+
+- **single-shot capability** — whether an unassisted first attempt passes;
+- **reliable capability** — pass rate across repeated cold attempts.
+
+Suggested routing threshold for production use: require either 3/3 cold passes or a larger-sample pass rate >= 90% on the relevant work-object class. A 1/3 success is evidence of possible capability, not safe routing.
+
+#### Phase C — benchmark the router/conductor separately
+
+Do not conflate worker quality with routing quality.
+
+Once per-model capability data exists, evaluate the conductor on unseen/held-out work objects. The conductor must choose a model using only pre-execution features available to routing, such as:
+
+- packet tokens/LOC;
+- dependency fan-in/fan-out;
+- export count;
+- external/DSH references;
+- statefulness;
+- concurrency/streaming;
+- UI/browser requirement;
+- acceptance-test surface;
+- declared architecture risk.
+
+Score routing on at least:
+
+- task success rate;
+- total cost/tokens;
+- unnecessary escalations;
+- under-routing failures;
+- number of retries;
+- time to accepted implementation.
+
+Compare the learned/heuristic router against simple baselines such as **always strongest**, **always cheapest**, and a fixed hand-written tier rule. A complex router is only useful if it improves the cost/reliability frontier.
+
+#### Phase D — continuous regression benchmark
+
+Keep a holdout suite that is not used to tune prompts, packet construction, routing thresholds, or model-specific fixes.
+
+Run it when any of these change materially:
+
+- work-object schema;
+- context-capsule generator;
+- conductor/router logic;
+- AGENTS instructions;
+- tool permissions;
+- important model/provider/version;
+- DSH integration architecture.
+
+Track capability by **work-object class**, not only one aggregate score. A model can improve on leaf coding while regresssing on contract fidelity or DSH integration.
+
+### Experimental design recommendations
+
+- Change one important variable at a time when making causal comparisons.
+- Randomize attempt order when provider load, caching, or temporal effects could bias results.
+- Use exact model/version identifiers; aliases such as `latest` are not reproducible benchmark identities.
+- Keep a stable benchmark-suite version and hash it.
+- Separate packet quality from model quality: the same model should sometimes be tested with alternate context-capsule variants as an explicit experiment.
+- Keep a small hidden holdout set to detect prompt/benchmark overfitting.
+- Prefer black-box behavioral tests over evaluator "vibes" wherever possible.
+- When subjective review is necessary, use a fixed rubric and blind the reviewer to worker model identity when practical.
+- Report uncertainty/pass counts, not only a single scalar score.
+- Optimize for a Pareto frontier of **correctness/reliability, cost, latency, and architecture compliance**, rather than tokens alone.
+
+### Recommended benchmark outcome
+
+For each work-object class, maintain a routing table resembling:
+
+```text
+class                 default tier   observed reliability   fallback
+leaf/data             small          97%                    medium
+UI/render             small/medium   92%                    medium
+stateful              medium         95%                    strong
+streaming/concurrency strong         94%                    strongest
+DSH/high-risk         strongest      98%                    architect review
+```
+
+The numbers above are illustrative; populate them only from measured runs.
+
+The final artifact of benchmarking should be a **capability map + routing policy**, not a leaderboard. The useful result is knowing which model tier can safely implement which kind of seam, at what cost and reliability.
+
 Recommended failure classes:
 
 `SYNTAX`, `BUILD`, `TYPE`, `TEST`, `FUNCTIONAL`, `CONTRACT`, `ARCHITECTURE`, `SCOPE`, `DEPENDENCY`, `ENVIRONMENT`, `TIMEOUT`, `NONCOMPLETION`.
