@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dsh-worldview.local/work-object.schema.json",
+  "title": "DSH Worldview Work Object",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "purpose", "dependsOn", "exports", "context", "touchesDSH", "risk", "acceptance"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^HG-[A-Z0-9]+-[0-9]{3}$" },
+    "purpose": { "type": "string", "minLength": 1 },
+    "dependsOn": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "exports": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "context": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "touchesDSH": { "type": "boolean" },
+    "risk": { "enum": ["low", "medium", "high"] },
+    "acceptance": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  }
+}
