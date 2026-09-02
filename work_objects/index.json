@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "root": "historical_globe_pseudocode",
+  "objects": [
+    {"id":"HG-BUNDLE-001","file":"historical_globe_pseudocode/00_profile/profile-and-bundle.pseudo.jsonc","dependsOn":[],"touchesDSH":true,"risk":"medium"},
+    {"id":"HG-PROFILE-001","file":"historical_globe_pseudocode/00_profile/profile-and-bundle.pseudo.jsonc","dependsOn":["HG-BUNDLE-001"],"touchesDSH":true,"risk":"medium"},
+    {"id":"HG-DOMAIN-001","file":"historical_globe_pseudocode/01_domain/domain.pseudo.ts","dependsOn":[],"touchesDSH":false,"risk":"low"},
+    {"id":"HG-STORE-001","file":"historical_globe_pseudocode/01_domain/store.pseudo.ts","dependsOn":["HG-DOMAIN-001"],"touchesDSH":false,"risk":"low"},
+    {"id":"HG-SHELL-001","file":"historical_globe_pseudocode/02_shell/total-conversion-shell.pseudo.tsx","dependsOn":[],"touchesDSH":true,"risk":"high"},
+    {"id":"HG-LOD-001","file":"historical_globe_pseudocode/06_lod/lod.pseudo.ts","dependsOn":["HG-DOMAIN-001"],"touchesDSH":false,"risk":"medium"},
+    {"id":"HG-SCENE-001","file":"historical_globe_pseudocode/03_scene/scene-projection.pseudo.ts","dependsOn":["HG-STORE-001","HG-LOD-001"],"touchesDSH":false,"risk":"medium"},
+    {"id":"HG-GLOBE-001","file":"historical_globe_pseudocode/04_globe/globe-renderer.pseudo.tsx","dependsOn":["HG-SCENE-001"],"touchesDSH":false,"risk":"medium"},
+    {"id":"HG-GLOBE-002","file":"historical_globe_pseudocode/04_globe/globe-renderer.pseudo.tsx","dependsOn":["HG-GLOBE-001"],"touchesDSH":false,"risk":"low"},
+    {"id":"HG-TIME-001","file":"historical_globe_pseudocode/05_timeline/timeline.pseudo.tsx","dependsOn":["HG-DOMAIN-001"],"touchesDSH":false,"risk":"low"},
+    {"id":"HG-TIME-002","file":"historical_globe_pseudocode/05_timeline/timeline.pseudo.tsx","dependsOn":["HG-TIME-001"],"touchesDSH":false,"risk":"low"},
+    {"id":"HG-AGENT-001","file":"historical_globe_pseudocode/07_agent/dsh-session-adapter.pseudo.ts","dependsOn":[],"touchesDSH":true,"risk":"high"},
+    {"id":"HG-AGENT-002","file":"historical_globe_pseudocode/07_agent/dsh-session-adapter.pseudo.ts","dependsOn":["HG-AGENT-001"],"touchesDSH":true,"risk":"high"},
+    {"id":"HG-AGENT-003","file":"historical_globe_pseudocode/07_agent/dsh-session-adapter.pseudo.ts","dependsOn":["HG-AGENT-001"],"touchesDSH":false,"risk":"medium"},
+    {"id":"HG-AGENTUI-001","file":"historical_globe_pseudocode/07_agent/agent-overlay.pseudo.tsx","dependsOn":["HG-AGENT-001","HG-AGENT-002","HG-AGENT-003"],"touchesDSH":false,"risk":"medium"},
+    {"id":"HG-SHELL-002","file":"historical_globe_pseudocode/02_shell/total-conversion-shell.pseudo.tsx","dependsOn":["HG-GLOBE-001","HG-TIME-002","HG-AGENTUI-001","HG-SCENE-001"],"touchesDSH":false,"risk":"medium"},
+    {"id":"HG-DATA-001","file":"historical_globe_pseudocode/08_data/seed-loader.pseudo.ts","dependsOn":["HG-DOMAIN-001"],"touchesDSH":false,"risk":"low"},
+    {"id":"HG-DIAG-001","file":"historical_globe_pseudocode/09_diagnostics/devtools-selftest.pseudo.ts","dependsOn":["HG-SHELL-001","HG-AGENT-001","HG-AGENT-002"],"touchesDSH":true,"risk":"high"},
+    {"id":"HG-DIAG-002","file":"historical_globe_pseudocode/09_diagnostics/devtools-selftest.pseudo.ts","dependsOn":["HG-GLOBE-002","HG-TIME-002","HG-AGENTUI-001","HG-DIAG-001"],"touchesDSH":false,"risk":"medium"},
+    {"id":"HG-BOOT-001","file":"historical_globe_pseudocode/10_boot/reproducible-boot.pseudo.ts","dependsOn":["HG-PROFILE-001","HG-BUNDLE-001"],"touchesDSH":true,"risk":"high"},
+    {"id":"HG-BOOT-002","file":"historical_globe_pseudocode/10_boot/reproducible-boot.pseudo.ts","dependsOn":["HG-BOOT-001","HG-DIAG-002"],"touchesDSH":true,"risk":"medium"}
+  ]
+}

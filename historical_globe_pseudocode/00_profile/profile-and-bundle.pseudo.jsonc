@@ -1,0 +1,48 @@
+/* @work-object
+{"id":"HG-PROFILE-001","purpose":"Describe the dedicated runnable Historical Globe DSH profile","dependsOn":["HG-BUNDLE-001"],"exports":["historical-globe profile manifest"],"context":["docs/10-dsh-seams.md"],"touchesDSH":true,"risk":"medium","acceptance":["dsh --profile historical-globe --dump-config resolves every listed bundle","profile does not require project source copied into DSH installation"]}
+@end-work-object */
+/* @seam HG-PROFILE-001:begin */
+PROFILE package.json := {
+  name: "dsh-profile-historical-globe",
+  private: true,
+  dependencies: {
+    // Real version/link strategy chosen by HG-BOOT-001.
+    "@deepseek-ai/dsh-base": PINNED_DSH_VERSION,
+    "@dsh-worldview/historical-globe-bundle": WORKSPACE_OR_FILE_REFERENCE
+  },
+  dsh: {
+    profile: {
+      bundles: [
+        "@deepseek-ai/dsh-base",
+        "@dsh-worldview/historical-globe-bundle"
+      ]
+    }
+  }
+}
+
+PROFILE cordis.patch.yml :=
+  // Machine/user overrides only. Product composition belongs in bundle.
+  []
+/* @seam HG-PROFILE-001:end */
+
+/* @work-object
+{"id":"HG-BUNDLE-001","purpose":"Publish one project-owned DSH bundle that mounts the Historical Globe client plugins","dependsOn":[],"exports":["bundle package manifest","bundle Cordis patch rows"],"context":["docs/10-dsh-seams.md"],"touchesDSH":true,"risk":"medium","acceptance":["package declares dsh.bundle.patch","bundle can be installed/linked into a profile from outside DSH installation","dump-config identifies bundle layer"]}
+@end-work-object */
+/* @seam HG-BUNDLE-001:begin */
+BUNDLE package.json := {
+  name: "@dsh-worldview/historical-globe-bundle",
+  version: "0.0.0-dev",
+  type: "module",
+  dsh: { bundle: { patch: "./cordis.patch.yml" } },
+  dependencies: {
+    "@dsh-worldview/globe-shell": "workspace:*",
+    "@dsh-worldview/globe-agent-view": "workspace:*"
+    // renderer/domain packages are ordinary dependencies of shell, not DSH rows.
+  }
+}
+
+BUNDLE cordis.patch.yml := [
+  INSERT client plugin row "historical-globe-shell" -> @dsh-worldview/globe-shell,
+  INSERT client plugin row "historical-globe-agent-view" -> @dsh-worldview/globe-agent-view
+]
+/* @seam HG-BUNDLE-001:end */
