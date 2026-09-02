@@ -24,15 +24,22 @@ class DshAgentSessionReader implements AgentSessionReader:
 /* @seam HG-AGENT-001:end */
 
 /* @work-object
-{"id":"HG-AGENT-002","purpose":"Send/cancel prompts to the same active DSH Session through the narrowest public input/conversation action seam","dependsOn":["HG-AGENT-001"],"exports":["AgentSessionActions"],"context":["docs/10-dsh-seams.md"],"touchesDSH":true,"risk":"high","acceptance":["custom text input sends into current session","new output is observed by HG-AGENT-001","cancel stops an active generation through public runtime action"]}
+{"id":"HG-AGENT-002","purpose":"Send/cancel prompts to the same active DSH Session through the narrowest public input/conversation action seam","dependsOn":["HG-AGENT-001"],"exports":["AgentSessionActions","AgentActionAcceptance"],"context":["docs/10-dsh-seams.md"],"touchesDSH":true,"risk":"high","acceptance":["custom text input sends into current session","send exposes accepted/rejected outcome to caller","new output is observed by HG-AGENT-001","cancel stops an active generation through public runtime action"]}
 @end-work-object */
 /* @seam HG-AGENT-002:begin */
+type AgentActionAcceptance = { accepted: true } // exact upstream return may be adapted into this owned contract
+
 class DshAgentSessionActions:
   constructor(publicConversationOrInputActions, sessionId)
-  send(text):
-    assert nonEmpty(text)
-    publicAction.send({ sessionId, text }) // adapt to exact upstream signature
-  cancel(): publicAction.cancel({ sessionId })
+
+  async send(text): Promise<AgentActionAcceptance>:
+    assert nonEmpty(trim(text))
+    result = await publicAction.send({ sessionId, text }) // adapt to exact upstream signature
+    if upstream rejects/fails: propagate project-owned action failure
+    return { accepted: true }
+
+  async cancel(): Promise<void>:
+    await publicAction.cancel({ sessionId })
 
 invariant: NEVER synthesize Session events locally to mimic sending
 /* @seam HG-AGENT-002:end */
