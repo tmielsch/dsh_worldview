@@ -1,9 +1,15 @@
 /* @work-object
-{"id":"HG-DOMAIN-001","purpose":"Define the DSH-neutral canonical historical domain contracts","dependsOn":[],"exports":["HistoricalEvent","HistoricalEntity","HistoricalRelation","GeoPoint","TimeInstant","SourceRef"],"context":["docs/00-product-contract.md"],"touchesDSH":false,"risk":"low","acceptance":["domain package imports no DSH packages","event/entity/relation ids are stable strings","open-ended events are representable"]}
+{"id":"HG-DOMAIN-001","purpose":"Define the DSH-neutral canonical historical domain contracts","dependsOn":[],"exports":["HistoricalEvent","HistoricalEntity","HistoricalRelation","GeoPoint","TimeInstant","SourceRef","compareHistoricalTime","normalizeHistoricalTime","addHistoricalDuration"],"context":["docs/00-product-contract.md"],"touchesDSH":false,"risk":"low","acceptance":["domain package imports no DSH packages","event/entity/relation ids are stable strings","open-ended events are representable","pre-CE and CE instants have canonical chronological comparison/arithmetic"]}
 @end-work-object */
 /* @seam HG-DOMAIN-001:begin */
 type HistoricalId = string
+
+// Serialized representation may evolve, but consumers MUST treat TimeInstant as
+// an opaque historical-time value and use the operations below for chronology.
+// Lexical string comparison is never a valid historical-time operation.
 type TimeInstant = ISO_8601_STRING | SIGNED_HISTORICAL_YEAR_ENCODING
+
+type HistoricalDuration = { years?: integer, months?: integer, days?: integer }
 
 type GeoPoint = { latitude: number[-90..90], longitude: number[-180..180] }
 type SourceRef = { kind: "wikipedia" | "wikidata" | "seed" | string, idOrUrl: string }
@@ -39,4 +45,18 @@ type HistoricalRelation = {
   startTime?: TimeInstant
   endTime?: TimeInstant
 }
+
+function normalizeHistoricalTime(value): TimeInstant :=
+  validate supported encoding
+  canonicalize equivalent representations
+  return canonical TimeInstant
+
+function compareHistoricalTime(a: TimeInstant, b: TimeInstant): -1 | 0 | 1 :=
+  // Semantic chronological comparison, including pre-CE < CE.
+  // NEVER compare serialized values lexically.
+  compare decoded normalized chronological coordinates
+
+function addHistoricalDuration(at: TimeInstant, delta: HistoricalDuration): TimeInstant :=
+  perform chronology-aware arithmetic on normalized value
+  return canonical TimeInstant
 /* @seam HG-DOMAIN-001:end */
