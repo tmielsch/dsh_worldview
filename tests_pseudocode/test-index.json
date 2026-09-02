@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "visibleTestFiles": {
+    "HG-BUNDLE-001": "tests_pseudocode/00_profile_domain.tests.pseudo.ts",
+    "HG-PROFILE-001": "tests_pseudocode/00_profile_domain.tests.pseudo.ts",
+    "HG-DOMAIN-001": "tests_pseudocode/00_profile_domain.tests.pseudo.ts",
+    "HG-STORE-001": "tests_pseudocode/00_profile_domain.tests.pseudo.ts",
+    "HG-LOD-001": "tests_pseudocode/00_profile_domain.tests.pseudo.ts",
+    "HG-SCENE-001": "tests_pseudocode/01_scene_ui.tests.pseudo.ts",
+    "HG-GLOBE-001": "tests_pseudocode/01_scene_ui.tests.pseudo.ts",
+    "HG-GLOBE-002": "tests_pseudocode/01_scene_ui.tests.pseudo.ts",
+    "HG-TIME-001": "tests_pseudocode/01_scene_ui.tests.pseudo.ts",
+    "HG-TIME-002": "tests_pseudocode/01_scene_ui.tests.pseudo.ts",
+    "HG-SHELL-001": "tests_pseudocode/01_scene_ui.tests.pseudo.ts",
+    "HG-SHELL-002": "tests_pseudocode/01_scene_ui.tests.pseudo.ts",
+    "HG-AGENT-001": "tests_pseudocode/02_agent.tests.pseudo.ts",
+    "HG-AGENT-002": "tests_pseudocode/02_agent.tests.pseudo.ts",
+    "HG-AGENT-003": "tests_pseudocode/02_agent.tests.pseudo.ts",
+    "HG-AGENTUI-001": "tests_pseudocode/02_agent.tests.pseudo.ts",
+    "HG-DATA-001": "tests_pseudocode/03_data_diag_boot.tests.pseudo.ts",
+    "HG-DIAG-001": "tests_pseudocode/03_data_diag_boot.tests.pseudo.ts",
+    "HG-DIAG-002": "tests_pseudocode/03_data_diag_boot.tests.pseudo.ts",
+    "HG-BOOT-001": "tests_pseudocode/03_data_diag_boot.tests.pseudo.ts",
+    "HG-BOOT-002": "tests_pseudocode/03_data_diag_boot.tests.pseudo.ts"
+  },
+  "evaluatorOracleFile": "tests_pseudocode/evaluator-oracles.pseudo.ts",
+  "harnessFile": "tests_pseudocode/test-harness.pseudo.ts",
+  "rules": [
+    "Every work_objects/index.json id must have exactly one visible @test-seam.",
+    "Every work object must have exactly one evaluator oracle family.",
+    "Concrete hidden seeds and materialized hidden fixtures are benchmark-run artifacts, not worker context.",
+    "Visible test translation and product implementation may be separate agent tasks."
+  ]
+}
