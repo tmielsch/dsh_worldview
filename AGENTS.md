@@ -193,9 +193,119 @@ Measure at least:
 - Preserve failed attempts and failure classifications; they are useful data.
 - Never modify canonical architecture solely to make a weak model score better unless that architecture change is itself a separately evaluated experiment.
 
+### Comparative experiment: measure the value of strong program design
+
+The conductor SHOULD periodically run a controlled comparison that separates **worker capability** from the value of the strong-model design layer.
+
+Use these arms:
+
+- **A — DESIGN_FIRST_CHEAP:** cheap worker receives the bounded work-object packet, dependency contracts, and validated visible tests produced by this design-first system.
+- **B — RAW_INIT_CHEAP:** the same cheap model receives only the pinned original user brief from `benchmarks/prompts/historical-globe-user-init-v1.md` plus a neutral execution envelope. It must plan/design/implement for itself.
+- **C — RAW_INIT_STRONG:** the strong reference model receives the same pinned original user brief and neutral execution envelope and performs the implementation directly.
+- **D — DESIGN_FIRST_STRONG (optional but recommended):** the strong reference model receives the same design-first packets as arm A. This estimates the packet ceiling and helps distinguish a defective specification from insufficient worker capability.
+
+Primary research questions:
+
+1. How much cheaper is A than C at comparable correctness?
+2. How much more reliable is A than B for the same cheap model?
+3. How much of A's gain comes from better specification rather than model size?
+4. Does D materially outperform A? If not, the packet may have reduced the implementation task enough that the cheap model is already sufficient.
+
+#### Raw-prompt baseline
+
+`benchmarks/prompts/historical-globe-user-init-v1.md` is the canonical **verbatim baseline prompt**. Treat it as immutable for benchmark suite v1.
+
+- Hash the exact prompt content for every run.
+- If the prompt changes materially, create `...-v2.md`; never silently edit the v1 benchmark identity.
+- The conductor may prepend/append only a separately hashed **neutral execution envelope** needed to operate tools, branch/worktree, return results, or obey repository safety rules.
+- The neutral envelope MUST NOT contain architecture, seam, test, DSH-integration, implementation-order, or failure hints derived from the design-first arm.
+- A RAW_INIT worker must not see `historical_globe_pseudocode/`, `work_objects/`, `tests_pseudocode/`, design-first benchmark outcomes, or design-specific sections of this AGENTS file.
+
+#### Branch/worktree isolation for comparative arms
+
+Use separate branches/worktrees; do not rely only on telling the model not to read files.
+
+Recommended shape:
+
+```text
+benchmark/<suite>/base-neutral
+benchmark/<suite>/raw-cheap/<attempt>
+benchmark/<suite>/raw-strong/<attempt>
+benchmark/<suite>/design-cheap/<work-id>/<attempt>
+benchmark/<suite>/design-strong/<work-id>/<attempt>
+```
+
+Rules:
+
+- Create all arms from a declared immutable experiment base/environment version.
+- RAW_INIT arms MUST use a **neutral workspace view** that physically excludes design-first pseudocode, work-object metadata, generated/visible design tests, evaluator oracles, token prognosis, and prior design-arm outputs.
+- DESIGN_FIRST arms may use the exact generated packet/context intended for production routing, but no evaluator-only oracle material.
+- Keep evaluator/oracle material in a trusted evaluator workspace or service outside all worker branches.
+- Never merge one arm into another before all compared attempts are scored.
+- Use independent worktrees for parallel attempts, even when they share a branch ancestry.
+- Record branch/ref, base SHA, worker-visible tree hash, prompt hash, packet hash when applicable, tool policy, and model settings.
+- If neutral and design-first branches necessarily have different repository contents, record both tree hashes; equality is not required because **information availability is the experimental variable**.
+
+#### Fair scoring across raw and design-first arms
+
+Do not accidentally grade the raw model against requirements invented only by the strong design pass.
+
+Every evaluator assertion should be classified as one of:
+
+- **CORE_USER_REQUIREMENT** — directly derivable from the pinned original user prompt; contributes to the primary cross-arm correctness score.
+- **DESIGN_REFINEMENT** — a useful invariant/edge case introduced during strong-model program design; reported as a secondary design-quality score and MUST NOT reduce the RAW_INIT arm's primary score unless the requirement is independently justified by the original prompt or universal repository/runtime correctness.
+- **UNIVERSAL_CORRECTNESS** — buildability, crashes, data corruption, security/scope violations, obvious resource leaks, invalid dependency resolution, and other failures that are fair to score for every arm.
+
+The primary A/B/C comparison uses `CORE_USER_REQUIREMENT + UNIVERSAL_CORRECTNESS`. `DESIGN_REFINEMENT` is reported separately. This prevents the designer from defining the exam after seeing its own answer.
+
+#### Two distinct cheap-model baselines
+
+When budget permits, distinguish:
+
+1. **RAW_END_TO_END:** cheap model gets only the raw init prompt, chooses architecture, writes its own tests, and implements. This is the primary control for "what would Qwen have done without the strong design?"
+2. **PACKET_IMPLEMENTATION:** cheap model gets the strong design packet + visible tests. This measures pure implementation capability after decomposition.
+
+Optionally add a third explicit experiment where the cheap model receives neutral black-box acceptance tests but no design pseudocode. Do not mix that result with RAW_END_TO_END, because tests themselves carry design information.
+
+#### Comparative run procedure
+
+For each selected benchmark slice:
+
+1. Freeze suite version, DSH version, dependency/runtime environment, tool permissions, evaluator version, and hidden-seed schedule.
+2. Materialize isolated worker branches/worktrees for each arm.
+3. Dispatch arms in randomized order when provider/load effects matter.
+4. Run cold attempts without evaluator feedback; minimum 3 attempts per arm when cost permits.
+5. Score all attempts with the same CORE evaluator and hidden-seed schedule.
+6. Score DESIGN_REFINEMENT separately.
+7. Record total tokens/cost for every participating model, including conductor/test-writer/evaluator/synthesizer when applicable.
+8. Record wall-clock time, retries, interventions, and whether a stronger model had to repair the result.
+9. Preserve every failed branch/diff/result as benchmark evidence; do not overwrite it.
+10. Only after scoring may the conductor run assisted recovery or merge accepted implementation work.
+
+Report at least:
+
+```text
+arm
+model + exact version
+prompt/tree/packet hashes
+cold pass count / attempts
+CORE_USER_REQUIREMENT score
+UNIVERSAL_CORRECTNESS score
+DESIGN_REFINEMENT score
+architecture/compliance score
+strong-model tokens
+cheap-model tokens
+all-model tokens
+normalized monetary cost
+latency
+retries/interventions
+```
+
+The key economic metric is **cost per accepted implementation at matched CORE correctness**, not raw token count.
+
 ### Recommended benchmark process: find the capability frontier
 
-The primary benchmark should not ask "which model is best?". It should estimate, for each class of work object, the **smallest/cheapest model that succeeds reliably under a fixed packet contract**.
+The primary model-ladder benchmark should estimate, for each class of work object, the **smallest/cheapest model that succeeds reliably under a fixed packet contract**.
 
 Use four distinct phases.
 
@@ -275,7 +385,7 @@ Run it when any of these change materially:
 - important model/provider/version;
 - DSH integration architecture.
 
-Track capability by **work-object class**, not only one aggregate score. A model can improve on leaf coding while regresssing on contract fidelity or DSH integration.
+Track capability by **work-object class**, not only one aggregate score. A model can improve on leaf coding while regressing on contract fidelity or DSH integration.
 
 ### Experimental design recommendations
 
